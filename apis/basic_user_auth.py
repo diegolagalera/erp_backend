@@ -1,16 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from config.database import user_connection
-from sqlalchemy.orm import Session
-from db.user_db import User as US
-from schemas.schemas import User as UserSchema
-from schemas.schemas import showUser as showUserSchema
-from schemas.schemas import UpdateUser as UpdateUserSchema
+from schemas.UserSchemas import UserSchema
 from typing import List
-from controller.baseCrud import BaseCrud
 
-from controller.userController import UserController
 
 auth = APIRouter(
     prefix='/auth', tags=["auth"], responses={404: {"message": "NO FOUND ROUTA /user"}})

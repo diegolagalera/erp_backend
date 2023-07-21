@@ -1,35 +1,32 @@
 from fastapi import FastAPI
 from typing import Union
-# IMPORTAR VARIABLES DE ENTORNO .ENV
-from dotenv import find_dotenv, load_dotenv
-datoenv_path =find_dotenv()
-load_dotenv(datoenv_path)
-
 from fastapi.staticfiles import StaticFiles
-from apis.gneral import General
-from apis.user import basic_user_auth, userApi
-from config.database import Base, engine
-
-
 
 app = FastAPI()
-# Routers
-app.include_router(General.general)
-app.include_router(basic_user_auth.auth)
-app.include_router(userApi.userApi)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
+# CARGAMOS TODAS LAS VARIABLE DEL .ENV
+def load_env_var():
+    from dotenv import find_dotenv, load_dotenv
+    datoenv_path = find_dotenv()
+    load_dotenv(datoenv_path)
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-
-
+# CARGAMOS LOS MODELOS A LA BASE DE DATOS
 def create_tables():
+    from config.database import Base, engine
     Base.metadata.create_all(bind=engine)
-    
+   
+
+# CARGAMOS LAS SUB APIS DE LOS MODELOS
+def load_sub_apis():
+    from apis.gneral import General
+    from apis import basic_user_auth, userApi
+    # -------------------------------------------------------------------------- #
+    app.include_router(General.general)
+    app.include_router(basic_user_auth.auth)
+    app.include_router(userApi.userApi)
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    # -------------------------------------------------------------------------- #
+
+load_env_var()
+load_sub_apis()
 create_tables()

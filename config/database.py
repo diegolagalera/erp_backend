@@ -10,7 +10,7 @@ engine = create_engine(SQLALCHEMY_DATABSE_URL)
 SessionLocal= sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
-def user_connection():
+def db_connection():
     db = SessionLocal()
     try:
         yield db
