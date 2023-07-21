@@ -1,7 +1,5 @@
 from controller.baseCrud import BaseCrud
 from db.user_db import User as User
-from schemas.schemas import UpdateUser as UpdateUserSchema
-
 
 class UserController(BaseCrud):
         model = User
