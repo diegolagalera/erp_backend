@@ -1,17 +1,30 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from schemas.UserSchemas import UserSchema, ShowUserSchema, UpdateUserSchema
+from schemas.UserSchemas import filter, UserSchema, ShowUserSchema, UpdateUserSchema, ShowUserSchemaPaginate,filterUserParamsSchema
 from service.userService import UserService
+from fastapi_pagination import LimitOffsetPage, Page, add_pagination
 
 
 userApi = APIRouter(
     prefix='/user', tags=["user"], responses={404: {"message": "NO FOUND ROUTA /user"}})
 
+add_pagination(userApi)
 
-@userApi.get("/", response_model=List[ShowUserSchema])
-def get_users():
+
+@userApi.post("/", response_model=ShowUserSchemaPaginate)
+def get_users(filter_paginate:filter=None):
     userService = UserService()
-    return userService.get_items()
+    print('filterrrr')
+    t =filter_paginate.dict(exclude_unset=True)
+    print(t['params'])
+    # print(filter_paginate.dict())
+    items, limit, offset = userService.get_items(t['params'])
+    # print(items)
+    response = ShowUserSchemaPaginate()
+    response.items=items
+    response.limit= limit
+    response.offset=offset
+    return response
 
 
 @userApi.get("/{user_id}", response_model=ShowUserSchema)

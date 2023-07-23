@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from typing import Union
 from fastapi.staticfiles import StaticFiles
+from fastapi_pagination import LimitOffsetPage, add_pagination, paginate
 
 app = FastAPI()
-
+add_pagination(app)
 # CARGAMOS TODAS LAS VARIABLE DEL .ENV
 def load_env_var():
     from dotenv import find_dotenv, load_dotenv

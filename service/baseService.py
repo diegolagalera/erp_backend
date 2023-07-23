@@ -1,14 +1,33 @@
 
+from controller.baseCrud import BaseCrud
+
+
 class BaseService():
-    modelCtr = None
+    modelCtr = BaseCrud
     updateSchema = None
 
     def __init__(self) -> None:
         pass
 
-    def get_items(self):
+    def get_items(self, filter=None):
+        """
+        ENTRADA: 
+        FILTER= [
+            {"username": "diego",'type': 'like'},
+            {"username": "diego",'type': '=='},
+            {"telefono": ['64440467', '64440469'],'type': 'in'},
+            {"apellido": '','type': '!='},
+            {"creacion": [10/12/1997,10/12/1997] ,
+            {"limit": "2"},
+            {"offset": "0"}
+            ]
+        SALIDA:
+        ITEMS, LIMIT, OFFSET
+        """
+        print('controllerrrr')
+        print(filter)
         itemCtr = self.modelCtr()
-        return itemCtr.get_items()
+        return itemCtr.get_items(filter)
 
     def create_item(self, item):
         itemCtr = self.modelCtr()

@@ -1,52 +1,90 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from schemas.UserSchemas import UserSchema
-from typing import List
+from schemas.UserSchemas import UserSchema, ShowUserSchema
+from fastapi.encoders import jsonable_encoder
 
+from sqlalchemy.orm import Session
+from config.database import db_connection
+from db.models.user import User
+from jose import jwt, JWTError
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+
+ALGORITM = "HS256"
+ACCESS_TOKE_DURATION = 1
+SECRET = 'e01a4f0700f6ef76c7b0820972dc472b08b15786c716b0cc688cae39b277a33c'
+crypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 auth = APIRouter(
     prefix='/auth', tags=["auth"], responses={404: {"message": "NO FOUND ROUTA /user"}})
 
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
 
-# class User(BaseModel):
-#     username : str
-#     full_name: str
-#     email: str
-#     disabled: str
 
+# coge el token de oauth2, lo decodifica y coge el username
+def auth_user(token: str = Depends(oauth2),  db: Session = Depends(db_connection)):
+    exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=" usuario no encontrado",
+        headers={"WWW-Authenticate": "Bearer"})
 
-def current_user(toke: str = Depends(oauth2)):
-    # TODO retorna el usuario
-    user = None
+    exception_time_out = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="session expirada, no tiene accesso",
+        headers={"WWW-Authenticate": "Bearer"})
+
+    try:
+        username = jwt.decode(token, SECRET, algorithms=[ALGORITM]).get('sub')
+        if username is None:
+            raise exception
+    except JWTError:
+        raise exception_time_out
+
+    user = db.query(User).filter(User.username == username).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="credenciales invalidas",
-            headers={"WWW-Authenticate": "Bearer"})
+        raise exception
 
-    return {"ok"}
+    return user
+
+
+def current_user(user: User = Depends(auth_user)):
+    if user.disabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="usuario inactivo",
+            headers={"WWW-Authenticate": "Bearer"})
+    return user
 
 
 @auth.post("/login")
-def login(form: OAuth2PasswordRequestForm = Depends()):
-    form.username
-    form.password
-    user = None
-    # user =db.get()
-    if not user:
-        raise HTTPException(status_code=400, detail="el ususrio no existe")
+def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(db_connection)):
+    try:
+        user = db.query(User).filter(User.username == form.username).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El usuario no existe"
+            )
 
-    if not form.password == user.password:
+        if not crypt.verify(form.password, user.password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cotraseña incorrecta"
+            )
+        data = {
+            "sub": user.username,
+            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKE_DURATION)
+        }
+    except:
         raise HTTPException(
-            status_code=400, detail="La contraseña es incorrecta")
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error al hacer login"
+        )
 
-    return {"access_token": "testtoken", "token_type": "bearer"}
+    return {"access_token": jwt.encode(data, SECRET, algorithm=ALGORITM), "token_type": "bearer"}
+    # print(jsonable_encoder(user))
 
 
-@auth.get("/me")
+@auth.get("/me", response_model=ShowUserSchema)
 def me(user: UserSchema = Depends(current_user)):
-    return {""}
-
-
-
+    return user
