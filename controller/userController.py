@@ -1,6 +1,6 @@
 from controller.baseController import BaseController
 from db.models.user import User as User
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
 from config.database import db_connection
 from sqlalchemy import or_
 
@@ -15,7 +15,8 @@ class UserController(BaseController):
     def user_exist(self, username: str, email: str):
 
         try:
-            db: Session = db_connection
+            # db: Session = db_connection
+            db = db_connection
             db = next(db())
             user = db.query(self.model).filter(or_(self.model.username == username,self.model.email ==email )).first()
             return user

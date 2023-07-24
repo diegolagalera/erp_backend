@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from typing import Union
 from fastapi.staticfiles import StaticFiles
 import logging
 from config.log_config import init_loggers
@@ -20,7 +19,6 @@ def create_tables():
     # from config.database import Base, engine
     from config.database import engine
     from db.models.base import Base
-    from sqlalchemy import event
     from db.datos.datos import create_data
     from config.roleConstant import defineRoleConstant
     Base.metadata.create_all(bind=engine)
@@ -32,10 +30,11 @@ def create_tables():
 def load_sub_apis():
     log.info('CARGANDO TODAS LAS RUTAS API DE LOS DIRECTORIOS')
     from apis.gneral import General
-    from apis import basic_user_auth, userApi
+    from apis import basic_user_auth, userApi, orderApi
     app.include_router(General.general)
     app.include_router(basic_user_auth.auth)
     app.include_router(userApi.userApi)
+    app.include_router(orderApi.orderApi)
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
 

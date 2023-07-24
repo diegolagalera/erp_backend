@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import or_, cast
 import sqlalchemy
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
 from config.database import db_connection
 from fastapi import HTTPException, status
 import logging
@@ -27,7 +27,8 @@ class BaseController():
     def get_item(self, item_id):
         log.info(f'Get Item {self.__class__.__name__}')
         try:
-            db: Session = db_connection
+            # db: Session = db_connection
+            db = db_connection
             db = next(db())
             item = db.query(self.model).filter(
                 self.model.id == item_id).first()
@@ -40,12 +41,17 @@ class BaseController():
                 detail="Error al obtener elemento de la BD " + str(e)
             )
 
-    def create_item(self, item):
+    def create_item(self, item, is_model: bool = False):
         log.info(f'Create Item {self.__class__.__name__}')
         try:
-            db: Session = db_connection
+            db = db_connection
             db = next(db())
-            newItem = self.model(**item)
+            print('denttttttttt')
+            if is_model:  # el modelo viene del padre solo guaradamos... revisar lo de guardar y multiples sesiones de db
+                newItem = db.merge(item)
+                # newItem = db.add(item)
+            else:
+                newItem = self.model(**item)
             db.add(newItem)
             db.commit()
             db.refresh(newItem)
@@ -60,7 +66,8 @@ class BaseController():
     def update_item(self, item_id):
         log.info(f'Update Item {self.__class__.__name__}')
         try:
-            db: Session = db_connection
+            # db: Session = db_connection
+            db = db_connection
             db = next(db())
             item = db.query(self.model).filter(self.model.id == item_id)
             if not item.first():
@@ -79,7 +86,8 @@ class BaseController():
     def delete_item(self, item_id):
         log.info(f'Delte Item {self.__class__.__name__}')
         try:
-            db: Session = db_connection
+            # db: Session = db_connection
+            db = db_connection
             db = next(db())
             item = db.query(self.model).filter(self.model.id == item_id)
 
@@ -111,7 +119,8 @@ class BaseController():
             ITEMS, LIMIT, OFFSET
         """
         try:
-            db: Session = db_connection
+            # db: Session = db_connection
+            db = db_connection
             db = next(db())
             query = db.query(self.model)
             limit = None

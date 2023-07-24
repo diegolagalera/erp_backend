@@ -12,6 +12,8 @@ class RoleChecker:
 
     def __call__(self, user: User = Depends(current_user)) -> bool:
         log.info('VERIFICANDO SI TIENES ACCESO A LA RUTA')
+        print('lllllllllllllllllllll')
+        print(user)
         if all(item is None for item in self.required_permissions):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

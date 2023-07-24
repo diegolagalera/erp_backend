@@ -26,7 +26,7 @@ class ShowUserSchema(BaseModel):
     telefono: int
     creacion: datetime
     role: List[int]
-    class Config():
+    class Config:
         orm_mode = True
 
 
@@ -36,11 +36,12 @@ class ShowUserSchemaPaginate(BaseModel):
     offset: int = None
     role: List[int] = None
 
-    class Config():
+    class Config:
         orm_mode = True
 
 
 class UpdateUserSchema(BaseModel):
+    id:int
     username: str = None
     password: str = None
     nombre: str = None
@@ -52,6 +53,7 @@ class UpdateUserSchema(BaseModel):
 
 
 class filterUserParamsSchema(BaseModel):
+    id:int
     username: Union[str, List[str]] = None
     nombre: Union[str, List[str]] = None
     apellido: Union[str, List[str]] = None

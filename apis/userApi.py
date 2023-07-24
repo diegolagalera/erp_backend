@@ -7,7 +7,14 @@ from config.roleConstant import ROLES
 userApi = APIRouter(
     prefix='/user', tags=["user"], responses={404: {"message": "NO FOUND ROUTA /user"}})
 
-@userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker([ROLES['USER'],ROLES['ADMIN']]))])
+acces_get_ussers = [ROLES['ADMIN'], ROLES['USER']]
+acces_get_usser = [ROLES['ADMIN'], ROLES['USER']]
+acces_create_user = [ROLES['ADMIN']]
+acces_update_user = [ROLES['ADMIN'], ROLES['USER']]
+acces_delete_user = [ROLES['ADMIN'], ]
+
+
+@userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
 def get_users(filter_paginate: filter = None):
     userService = UserService()
     # quita todos los valores NONES del filtro
@@ -23,7 +30,10 @@ def get_users(filter_paginate: filter = None):
 @userApi.get("/{user_id}", response_model=ShowUserSchema)
 def get_user(user_id: int):
     userService = UserService()
-    return userService.get_item(user_id)
+    response= userService.get_item(user_id)
+    print('lllllllllllllllllllllllllllllllllllllllllllllllllllll')
+    print(response)
+    return response
 
 
 @userApi.post("/create", response_model=ShowUserSchema, status_code=status.HTTP_201_CREATED)
