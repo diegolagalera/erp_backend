@@ -1,29 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from schemas.UserSchemas import filter, UserSchema, ShowUserSchema, UpdateUserSchema, ShowUserSchemaPaginate,filterUserParamsSchema
+from schemas.UserSchemas import filter, UserSchema, ShowUserSchema, UpdateUserSchema, ShowUserSchemaPaginate, filterUserParamsSchema
 from service.userService import UserService
-from fastapi_pagination import LimitOffsetPage, Page, add_pagination
-
-
+from config.roleChecker import RoleChecker
+from config.roleConstant import ROLES
 userApi = APIRouter(
     prefix='/user', tags=["user"], responses={404: {"message": "NO FOUND ROUTA /user"}})
 
-add_pagination(userApi)
-
-
-@userApi.post("/", response_model=ShowUserSchemaPaginate)
-def get_users(filter_paginate:filter=None):
+@userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker([ROLES['USER'],ROLES['ADMIN']]))])
+def get_users(filter_paginate: filter = None):
     userService = UserService()
-    print('filterrrr')
-    t =filter_paginate.dict(exclude_unset=True)
-    print(t['params'])
-    # print(filter_paginate.dict())
-    items, limit, offset = userService.get_items(t['params'])
-    # print(items)
+    # quita todos los valores NONES del filtro
+    filter = filter_paginate.dict(exclude_unset=True)
+    items, limit, offset = userService.get_items(filter['params'])
     response = ShowUserSchemaPaginate()
-    response.items=items
-    response.limit= limit
-    response.offset=offset
+    response.items = items
+    response.limit = limit
+    response.offset = offset
     return response
 
 
@@ -33,13 +26,19 @@ def get_user(user_id: int):
     return userService.get_item(user_id)
 
 
-@userApi.post("/create")
+@userApi.post("/create", response_model=ShowUserSchema, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserSchema):
     userService = UserService()
-    return userService.create_item(user)
+    if userService.create_item(user):
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error al crear el usuario"
+        )
 
 
-@userApi.patch("/{user_id}")
+@userApi.patch("/{user_id}", response_model=ShowUserSchema)
 def update_user(user_id: int, updateUser: UpdateUserSchema):
     userService = UserService(updateUser)
     return userService.update_item(user_id)

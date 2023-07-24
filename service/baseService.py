@@ -1,16 +1,43 @@
 
-from controller.baseCrud import BaseCrud
+import logging
+log = logging.getLogger("app")
 
 
 class BaseService():
-    modelCtr = BaseCrud
+    modelCtr = None
     updateSchema = None
 
     def __init__(self) -> None:
         pass
 
     def get_items(self, filter=None):
-        """
+        log.info(f'Get Items {self.__class__.__name__}')
+        itemCtr = self.modelCtr()
+        return itemCtr.get_items(filter)
+
+    def get_item(self, item_id: int):
+        log.info(f'Get Item {self.__class__.__name__}')
+        itemCtr = self.modelCtr()
+        return itemCtr.get_item(item_id)
+
+    def create_item(self, item):
+        log.info(f'Create Item {self.__class__.__name__}')
+        itemCtr = self.modelCtr()
+        response = itemCtr.create_item(item.dict())
+        return response
+
+    def update_item(self, user_id: int):
+        log.info(f'Update Item {self.__class__.__name__}')
+        itemCtr = self.modelCtr(self.updateSchema)
+        return itemCtr.update_item(user_id)
+
+    def delete_item(self, item_id: int):
+        log.info(f'Delte Item {self.__class__.__name__}')
+        itemCtr = self.modelCtr()
+        return itemCtr.delete_item(item_id)
+
+
+""" get_items
         ENTRADA: 
         FILTER= [
             {"username": "diego",'type': 'like'},
@@ -23,25 +50,4 @@ class BaseService():
             ]
         SALIDA:
         ITEMS, LIMIT, OFFSET
-        """
-        print('controllerrrr')
-        print(filter)
-        itemCtr = self.modelCtr()
-        return itemCtr.get_items(filter)
-
-    def create_item(self, item):
-        itemCtr = self.modelCtr()
-        response = itemCtr.create_item(item.dict())
-        return response
-
-    def get_item(self, item_id: int):
-        itemCtr = self.modelCtr()
-        return itemCtr.get_item(item_id)
-
-    def update_item(self, user_id: int):
-        itemCtr = self.modelCtr(self.updateSchema)
-        return itemCtr.update_item(user_id)
-
-    def delete_item(self, item_id: int):
-        itemCtr = self.modelCtr()
-        return itemCtr.delete_item(item_id)
+"""

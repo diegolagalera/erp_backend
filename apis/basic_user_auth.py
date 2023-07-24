@@ -9,16 +9,17 @@ from db.models.user import User
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-
+import logging
+log = logging.getLogger("app")
 ALGORITM = "HS256"
-ACCESS_TOKE_DURATION = 1
+ACCESS_TOKE_DURATION = 10
 SECRET = 'e01a4f0700f6ef76c7b0820972dc472b08b15786c716b0cc688cae39b277a33c'
 crypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 auth = APIRouter(
     prefix='/auth', tags=["auth"], responses={404: {"message": "NO FOUND ROUTA /user"}})
 
-oauth2 = OAuth2PasswordBearer(tokenUrl="login")
+oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 # coge el token de oauth2, lo decodifica y coge el username

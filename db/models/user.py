@@ -1,6 +1,9 @@
 from config.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from datetime import datetime
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
+
 
 class User(Base):
     __tablename__ = "user"
@@ -11,23 +14,10 @@ class User(Base):
     apellido = Column(String)
     direccion = Column(String)
     telefono = Column(Integer)
-    correo = Column(String, unique=True)
+    email = Column(String, unique=True)
     creacion = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    disabled= Column(Boolean, default=False)
-    
-
-# {
-#       "username": "string",
-#       "nombre": "string",
-#       "apellido": "string",
-#       "telefono": 0,
-#       "creacion": [
-#         "2023-07-23T02:02:38.880Z",
-#         null
-#       ],
-#       "disabled": true,
-#       "text": "string",
-#       "limit": 0,
-#       "offset": 0,
-#       "type": "string"
-#     }
+    disabled = Column(Boolean, default=False)
+    role = Column(PG_ARRAY(Integer), server_default='{1,2}')
+    # role = Column(PG_ARRAY(int), server_default='{"1","2"}')
+    # role = Column(PG_ARRAY(String), default=["user"])
+    orders = relationship('Order', back_populates='user')

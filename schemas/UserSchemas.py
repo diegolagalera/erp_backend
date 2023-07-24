@@ -11,8 +11,12 @@ class UserSchema(BaseModel):
     apellido: str
     direccion: Optional[str]
     telefono: int
-    correo: str
+    email: str
     creacion: datetime = datetime.now()
+    role: List[int] = None
+
+    class config:
+        orm_mode = True
 
 
 class ShowUserSchema(BaseModel):
@@ -21,13 +25,16 @@ class ShowUserSchema(BaseModel):
     apellido: str
     telefono: int
     creacion: datetime
+    role: List[int]
     class Config():
         orm_mode = True
 
+
 class ShowUserSchemaPaginate(BaseModel):
-    items:List[ShowUserSchema] = []
-    limit: str = None
-    offset: str = None
+    items: List[ShowUserSchema] = []
+    limit: int = None
+    offset: int = None
+    role: List[int] = None
 
     class Config():
         orm_mode = True
@@ -40,11 +47,8 @@ class UpdateUserSchema(BaseModel):
     apellido: str = None
     direccion: str = None
     telefono: int = None
-    correo: str = None
-
-class username(BaseModel):
-    username: Union[str, List[str]] = None
-    type: str= None
+    role: List[int] = None
+    email: str = None
 
 
 class filterUserParamsSchema(BaseModel):
@@ -52,14 +56,13 @@ class filterUserParamsSchema(BaseModel):
     nombre: Union[str, List[str]] = None
     apellido: Union[str, List[str]] = None
     telefono: Union[int, List[int]] = None
-    creacion: List[Union[datetime, None]] =None
-    correo: Union[str, List[str]] = None
+    creacion: List[Union[datetime, None]] = None
+    email: Union[str, List[str]] = None
     disabled: Union[str, bool] = None
     text: Union[str, List[str]] = None
     limit: int = None
     offset: int = None
-    type: str= None
-
+    type: str = None
 
 
 class filter(BaseModel):
