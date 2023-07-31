@@ -20,6 +20,7 @@ class UserSchema(BaseModel):
 
 
 class ShowUserSchema(BaseModel):
+    id: int
     username: str
     nombre: str
     apellido: str
@@ -34,8 +35,6 @@ class ShowUserSchemaPaginate(BaseModel):
     items: List[ShowUserSchema] = []
     limit: int = None
     offset: int = None
-    role: List[int] = None
-
     class Config:
         orm_mode = True
 
@@ -53,7 +52,7 @@ class UpdateUserSchema(BaseModel):
 
 
 class filterUserParamsSchema(BaseModel):
-    id:int
+    # id:int
     username: Union[str, List[str]] = None
     nombre: Union[str, List[str]] = None
     apellido: Union[str, List[str]] = None

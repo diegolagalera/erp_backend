@@ -1,7 +1,7 @@
 from controller.baseController import BaseController
 from db.models.orders import Order
 # from sqlalchemy.orm import Session
-# from config.database import db_connection
+from config.database import db_connection
 from sqlalchemy import or_
 from schemas.OrderSchemas import ShowOrderSchema, UpdateOrderSchema
 
@@ -19,10 +19,8 @@ class OrderController(BaseController):
             item = item.dict()
             new_order = Order(**item)
             new_order.user = user
-            return super().create_item(new_order,True)
+            return super().create_item(new_order,is_model=True)
         except:
             raise
 
-        # return super().create_item(item)
-
-
+    

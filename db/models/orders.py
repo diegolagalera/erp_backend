@@ -8,5 +8,6 @@ class Order(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     status = Column(String)
     quantity = Column(Integer)
-    user_id = Column(Integer, ForeignKey('user.id'))
+
+    user_id = Column(Integer, ForeignKey('users.id'))
     user= relationship('User',back_populates='orders')

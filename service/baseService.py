@@ -6,7 +6,7 @@ log = logging.getLogger("app")
 class BaseService():
     modelCtr = None
     updateSchema = None
-
+    db = None
     def __init__(self) -> None:
         pass
 
@@ -17,12 +17,14 @@ class BaseService():
 
     def get_item(self, item_id: int):
         log.info(f'Get Item {self.__class__.__name__}')
-        itemCtr = self.modelCtr()
+        print('ooll')
+        print(self.db)
+        itemCtr = self.modelCtr(db=self.db)
         return itemCtr.get_item(item_id)
 
     def create_item(self, item):
         log.info(f'Create Item {self.__class__.__name__}')
-        itemCtr = self.modelCtr()
+        itemCtr = self.modelCtr(db=self.db)
         response = itemCtr.create_item(item.dict())
         return response
 

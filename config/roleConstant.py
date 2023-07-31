@@ -8,8 +8,8 @@ AQUI CARGAMOS TODOS LOS ROLES QUE TENEMOS EN LA BASE DE DATOS PARA PODER UTILIZA
 ES OBLIGADO QUE EL ROL QUE ESTA EN BD ESTE EN DECLARADO EN ESTE ARCHIVO COMO NONE
 """
 ROLES = {
-    'ADMIN': None,
-    'USER': None
+    'admin': None,
+    'user': None
 }
 
 
@@ -21,6 +21,6 @@ def defineRoleConstant():
         roles = db.query(Role).filter().all()
         if roles:
             for rol in roles:
-                ROLES[rol.constant] = rol.id
+                ROLES[rol.name] = rol.id
     except:
         raise

@@ -1,21 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from schemas.UserSchemas import filter, UserSchema, ShowUserSchema, UpdateUserSchema, ShowUserSchemaPaginate, filterUserParamsSchema
+from db.models.user import filter, UserSchema, ShowUserSchema, UpdateUserSchema, ShowUserSchemaPaginate, filterUserParamsSchema
 from service.userService import UserService
 from config.roleChecker import RoleChecker
 from config.roleConstant import ROLES
+from fastapi.encoders import jsonable_encoder
+from dateutil.parser import parse as parse_datetime
+from config.database import db_connection
+
 userApi = APIRouter(
     prefix='/user', tags=["user"], responses={404: {"message": "NO FOUND ROUTA /user"}})
 
-acces_get_ussers = [ROLES['ADMIN'], ROLES['USER']]
-acces_get_usser = [ROLES['ADMIN'], ROLES['USER']]
-acces_create_user = [ROLES['ADMIN']]
-acces_update_user = [ROLES['ADMIN'], ROLES['USER']]
-acces_delete_user = [ROLES['ADMIN'], ]
+acces_get_ussers = [ROLES['admin'], ROLES['user']]
+acces_get_usser = [ROLES['admin'], ROLES['user']]
+acces_create_user = [ROLES['admin']]
+acces_update_user = [ROLES['admin'], ROLES['user']]
+acces_delete_user = [ROLES['admin'], ]
 
+# @userApi.post("/", response_model=ShowUserSchemaPaginate)
 
 @userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
 def get_users(filter_paginate: filter = None):
+    print(jsonable_encoder(filter_paginate))
     userService = UserService()
     # quita todos los valores NONES del filtro
     filter = filter_paginate.dict(exclude_unset=True)
@@ -31,28 +37,25 @@ def get_users(filter_paginate: filter = None):
 def get_user(user_id: int):
     userService = UserService()
     response= userService.get_item(user_id)
-    print('lllllllllllllllllllllllllllllllllllllllllllllllllllll')
-    print(response)
+    print('hhhhhhhh')
+    print(jsonable_encoder(response))
+    print(jsonable_encoder(response.roles))
     return response
 
 
 @userApi.post("/create", response_model=ShowUserSchema, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserSchema):
     userService = UserService()
-    if userService.create_item(user):
-        return user
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error al crear el usuario"
-        )
+    return userService.create_item(user)
 
 
 @userApi.patch("/{user_id}", response_model=ShowUserSchema)
 def update_user(user_id: int, updateUser: UpdateUserSchema):
     userService = UserService(updateUser)
-    return userService.update_item(user_id)
+    response =userService.update_item(user_id)
 
+    print(jsonable_encoder(response))
+    return response
 
 @userApi.delete("/delete")
 def delete_user(user_id: int):

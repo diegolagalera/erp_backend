@@ -19,10 +19,11 @@ class RoleChecker:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail='LAS CONSTANTES DE ROLES NO ESTAN CARGADAS'
             )
-        if (len(user.role) != 0):
+        if (len(user.roles) != 0):
             for r_perm in self.required_permissions:
-                if r_perm in user.role:  # si el usuario tiene tan solo 1  de esos roles para acceder a esa ruta podra verla
-                    return True
+                for role in user.roles:
+                    if r_perm == role.id:  # si el usuario tiene tan solo 1  de esos roles para acceder a esa ruta podra verla
+                        return True
 
                 # if r_perm not in user.role:
                 #     raise HTTPException(

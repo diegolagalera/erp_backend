@@ -15,25 +15,35 @@ class BaseController():
     model = None
     # ESQUEMA QUE ACTUALIZARA SOLO LOS DATOS QUE SE ENVIEN
     updateSchema = None
+    db = None
 
     def __init__(self):
         # self.updateSchema = updateSchema
         pass
 
     def get_items(self, filter=None):
-        log.info(f'Get Items {self.__class__.__name__}')
-        return self.filter_and_paginate(filter)
+        try:
+            log.info(f'Get Items {self.__class__.__name__}')
+            return self.filter_and_paginate(filter)
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error al obtener los elementos de la BD " + str(e)
+            )
 
     def get_item(self, item_id):
         log.info(f'Get Item {self.__class__.__name__}')
         try:
             # db: Session = db_connection
-            db = db_connection
-            db = next(db())
-            item = db.query(self.model).filter(
+            print('ioioioioio')
+            print(self.db)
+            # db = db_connection
+            # db = next(db())
+            item = self.db.query(self.model).filter(
                 self.model.id == item_id).first()
-            if not item:
-                return {"msg": "item no encontrado"}
+            # if not item:
+            #     return {"msg": "item no encontrado"}
+
             return item
         except SQLAlchemyError as e:
             raise HTTPException(
@@ -44,9 +54,9 @@ class BaseController():
     def create_item(self, item, is_model: bool = False):
         log.info(f'Create Item {self.__class__.__name__}')
         try:
+            print('pppppppppppppppppppp')
             db = db_connection
             db = next(db())
-            print('denttttttttt')
             if is_model:  # el modelo viene del padre solo guaradamos... revisar lo de guardar y multiples sesiones de db
                 newItem = db.merge(item)
                 # newItem = db.add(item)
@@ -55,8 +65,8 @@ class BaseController():
             db.add(newItem)
             db.commit()
             db.refresh(newItem)
+            # db.close()
             return newItem
-            # return "todo ok en el usuario"
         except SQLAlchemyError as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -71,9 +81,11 @@ class BaseController():
             db = next(db())
             item = db.query(self.model).filter(self.model.id == item_id)
             if not item.first():
-                return {"msg": "usuario no encontrado"}
+                return {"msg": "elemento no encontrado"}
             item.update(self.updateSchema.dict(exclude_unset=True))
             db.commit()
+            # db.close()
+
             return db.query(self.model).filter(self.model.id == item_id).first()
 
             # return {"msg": "usuario actualizado correctamente"}
@@ -92,10 +104,12 @@ class BaseController():
             item = db.query(self.model).filter(self.model.id == item_id)
 
             if not item.first():
-                return {"msg": "usuario no encontrado"}
+                return {"msg": "elemento no encontrado"}
             item.delete(synchronize_session=False)
             db.commit()
-            return {"msg": "usuario eliminado correctamente"}
+            # db.close()
+
+            return {"msg": "elemento eliminado correctamente"}
         except SQLAlchemyError as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -212,6 +226,8 @@ class BaseController():
                     items = query.all()
             else:
                 items = query.all()
+
+            # db.close()
             return items, limit, offset
         except SQLAlchemyError as e:
             raise HTTPException(

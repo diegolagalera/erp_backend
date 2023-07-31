@@ -6,9 +6,9 @@ import os
 # CONNEXION A BASE DE DATOS
 SQLALCHEMY_DATABSE_URL = os.getenv("DATA_BASE_URL")
 engine = create_engine(SQLALCHEMY_DATABSE_URL)
-
-SessionLocal= sessionmaker(bind=engine, autocommit=False, autoflush=False)
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
+
 
 def db_connection():
     db = SessionLocal()
