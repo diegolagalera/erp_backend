@@ -8,17 +8,17 @@ AQUI CARGAMOS TODOS LOS ROLES QUE TENEMOS EN LA BASE DE DATOS PARA PODER UTILIZA
 ES OBLIGADO QUE EL ROL QUE ESTA EN BD ESTE EN DECLARADO EN ESTE ARCHIVO COMO NONE
 """
 ROLES = {
-    'admin': None,
-    'user': None
+    'admin': 1,
+    'user': 2
 }
 
 
-def defineRoleConstant():
+async def defineRoleConstant():
     log.info('CARGANDO CONSTANTES DE LA TABLA ROLES AL SISTEMA')
     try:
         db: Session = db_connection
         db = next(db())
-        roles = db.query(Role).filter().all()
+        roles = await db.query(Role).filter().all()
         if roles:
             for rol in roles:
                 ROLES[rol.name] = rol.id

@@ -13,25 +13,34 @@ from service.roleService import RoleService
 class UserService(BaseService):
     modelCtr = UserController
     updateSchema = UpdateUserSchema
+    db = None
 
-    def __init__(self, updateSchema=None):
+    def __init__(self, updateSchema=None, db=None):
         self.updateSchema = updateSchema
+        self.db = db
 
     def create_item(self, item):
         try:
-            user_ctr = UserController()
+            user_ctr = UserController(db=self.db)
             userExist = user_ctr.user_exist(item.username, item.email)
             if not userExist:
                 item = item.dict()
                 roles = item.pop('roles')
                 user = User(**item)
                 user.password = get_hashed_password(user.password)
+                print('diossssssssssssssssss')
+                print(roles)
                 if roles:
                     for rol in roles:
-                        role = RoleService().get_item(rol)
+                        role = RoleService(db=self.db).get_item(rol)
+                        print('lo tengooooo')
+                        print(rol)
                         if role:
                             user.roles.append(role)
 
+                print('111111111111')
+                print(user)
+                print(user.roles)
                 return user_ctr.create_item(user, is_model=True)
             else:
                 raise HTTPException(

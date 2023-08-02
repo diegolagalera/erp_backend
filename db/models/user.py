@@ -56,12 +56,13 @@ class UserSchema(BaseModel):
     disabled: Optional[bool] = False
     roles: Optional[List[int]] = None
 
+
 class ShowUserSchema(BaseModel):
     id: int
-    username: str
-    name: str
-    surname: str
-    direction: str
+    username: Optional[str] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    direction: Optional[str] = None
     tel: int
     email: str
     created: datetime

@@ -1,9 +1,12 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-import logging
 from config.log_config import init_loggers
 init_loggers()
+import logging
+import os
+ENV = os.getenv("ENV", "production")
+
 log = logging.getLogger("app")
 
 origins = [
@@ -40,6 +43,8 @@ def create_tables():
     from db.models.base import Base
     from db.datos.datos import create_data
     from config.roleConstant import defineRoleConstant
+    if ENV == 'test':
+        Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     # TODO ELIMINAR ESTA SECCION DE CREAR DATOS DE PRUEBA A LA BASE DE DATOS
     # create_data()
@@ -56,6 +61,7 @@ def load_sub_apis():
     app.include_router(orderApi.orderApi)
     app.include_router(roleApi.roleApi)
     app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 
 load_env_var()

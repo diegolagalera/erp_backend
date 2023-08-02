@@ -8,6 +8,7 @@ from config.database import db_connection
 from fastapi import HTTPException, status
 import logging
 log = logging.getLogger("app")
+from fastapi.encoders import jsonable_encoder
 
 
 class BaseController():
@@ -55,8 +56,9 @@ class BaseController():
         log.info(f'Create Item {self.__class__.__name__}')
         try:
             print('pppppppppppppppppppp')
-            db = db_connection
-            db = next(db())
+            # db = db_connection
+            # db = next(db())
+            db = self.db
             if is_model:  # el modelo viene del padre solo guaradamos... revisar lo de guardar y multiples sesiones de db
                 newItem = db.merge(item)
                 # newItem = db.add(item)
@@ -77,8 +79,9 @@ class BaseController():
         log.info(f'Update Item {self.__class__.__name__}')
         try:
             # db: Session = db_connection
-            db = db_connection
-            db = next(db())
+            # db = db_connection
+            # db = next(db())
+            db = self.db
             item = db.query(self.model).filter(self.model.id == item_id)
             if not item.first():
                 return {"msg": "elemento no encontrado"}
@@ -99,8 +102,9 @@ class BaseController():
         log.info(f'Delte Item {self.__class__.__name__}')
         try:
             # db: Session = db_connection
-            db = db_connection
-            db = next(db())
+            # db = db_connection
+            # db = next(db())
+            db = self.db
             item = db.query(self.model).filter(self.model.id == item_id)
 
             if not item.first():
@@ -134,8 +138,10 @@ class BaseController():
         """
         try:
             # db: Session = db_connection
-            db = db_connection
-            db = next(db())
+            print('madreeeeeeeeeeeeee')
+            # db = db_connection
+            # db = next(db())
+            db = self.db
             query = db.query(self.model)
             limit = None
             offset = None
@@ -228,6 +234,11 @@ class BaseController():
                 items = query.all()
 
             # db.close()
+            print('adiossssssssssssss')
+            print(jsonable_encoder(items))
+            print(limit)
+            print(offset)
+
             return items, limit, offset
         except SQLAlchemyError as e:
             raise HTTPException(

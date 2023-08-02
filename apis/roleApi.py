@@ -52,8 +52,8 @@ async def get_order(role_id: int, db: Session = Depends(db_connection)):
 
 
 @roleApi.post("/create", response_model=ShowRoleSchema, status_code=status.HTTP_201_CREATED)
-async def create_order(order: RoleSchema):
-    roleService = RoleService()
+async def create_order(order: RoleSchema, db: Session = Depends(db_connection)):
+    roleService = RoleService(db=db)
     # auth_user(request)
     try:
         return roleService.create_item(order)

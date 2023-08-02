@@ -13,9 +13,11 @@ from fastapi.encoders import jsonable_encoder
 class UserController(BaseController):
     model = User
     updateSchema = None
+    db = None
 
-    def __init__(self, updateSchema=None):
+    def __init__(self, updateSchema=None, db=None):
         self.updateSchema = updateSchema
+        self.db = db
 
     def user_exist(self, username: str, email: str):
 

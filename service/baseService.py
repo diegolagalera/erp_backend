@@ -12,7 +12,7 @@ class BaseService():
 
     def get_items(self, filter=None):
         log.info(f'Get Items {self.__class__.__name__}')
-        itemCtr = self.modelCtr()
+        itemCtr = self.modelCtr(db=self.db)
         return itemCtr.get_items(filter)
 
     def get_item(self, item_id: int):
