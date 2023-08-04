@@ -28,19 +28,11 @@ class UserService(BaseService):
                 roles = item.pop('roles')
                 user = User(**item)
                 user.password = get_hashed_password(user.password)
-                print('diossssssssssssssssss')
-                print(roles)
                 if roles:
                     for rol in roles:
                         role = RoleService(db=self.db).get_item(rol)
-                        print('lo tengooooo')
-                        print(rol)
                         if role:
                             user.roles.append(role)
-
-                print('111111111111')
-                print(user)
-                print(user.roles)
                 return user_ctr.create_item(user, is_model=True)
             else:
                 raise HTTPException(
@@ -53,12 +45,12 @@ class UserService(BaseService):
     def update_item(self, user_id: int):
         itemToUpdate = self.updateSchema.dict()
         roles = itemToUpdate['roles']
-        user_ctr = UserController(self.updateSchema)
+        user_ctr = UserController(self.updateSchema, db=self.db)
         role_list = []
         if roles:
             role_list = []
             for rol in roles:
-                role_list.append(RoleService().get_item(rol))
+                role_list.append(RoleService(db=self.db).get_item(rol))
         if roles == None:
             return user_ctr.update_item(user_id, None)
         else:

@@ -7,6 +7,7 @@ class BaseService():
     modelCtr = None
     updateSchema = None
     db = None
+
     def __init__(self) -> None:
         pass
 
@@ -17,8 +18,6 @@ class BaseService():
 
     def get_item(self, item_id: int):
         log.info(f'Get Item {self.__class__.__name__}')
-        print('ooll')
-        print(self.db)
         itemCtr = self.modelCtr(db=self.db)
         return itemCtr.get_item(item_id)
 
@@ -28,14 +27,14 @@ class BaseService():
         response = itemCtr.create_item(item.dict())
         return response
 
-    def update_item(self, user_id: int):
+    def update_item(self, item_id: int):
         log.info(f'Update Item {self.__class__.__name__}')
-        itemCtr = self.modelCtr(self.updateSchema)
-        return itemCtr.update_item(user_id)
+        itemCtr = self.modelCtr(updateSchema=self.updateSchema, db=self.db)
+        return itemCtr.update_item(item_id)
 
     def delete_item(self, item_id: int):
         log.info(f'Delte Item {self.__class__.__name__}')
-        itemCtr = self.modelCtr()
+        itemCtr = self.modelCtr(db=self.db)
         return itemCtr.delete_item(item_id)
 
 

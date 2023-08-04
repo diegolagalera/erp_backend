@@ -3,59 +3,74 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import HTTPException, status
 
-# client = TestClient(app)
-# roleTest: {
-#     'name': 'roleTest1',
-#     'disabled': False
-# }
+client = TestClient(app)
 
 
-# @pytest.fixture(scope="function")
-# def client() -> TestClient:
-#     "start Client"
-#     return TestClient(app)
+@pytest.fixture
+def setUp():
+    user_1 = {'username': 'admin', 'password': 'admin',
+              'tel': 000000000, 'email': 'admin@gmail.com', 'roles': [1]}
+    client.post(
+        "/role/create/", json={'name': 'admin', 'disabled': False})
+    client.post('/user/create', json=user_1)
+    login_user = {'username': 'admin', 'password': 'admin'}
+    login = client.post('/auth/login', data=login_user)
+    header = {'Authorization': 'Bearer ' + login.json()["access_token"]}
+    yield header
 
 
-# @pytest.fixture
-# def setUp(client: TestClient):
-#     print('ooooooooooooooooooooooooooo')
-#     user_1 = {'username': 'diego1', 'password': '123456',
-#               'tel': 000000000, 'email': 'diego@gmail1.com'}
-#     user_insert = client.post('/user/create', json=user_1)
-#     # assert user_insert.status_code == status.HTTP_201_CREATED
-#     login_user = {'username': 'diego1', 'password': '123456'}
-   
-#     login = client.post('/auth/login', data=login_user)
-#     print('iiiiiiiiiiiiiiiiiiii')
-#     print(user_insert)
-#     print(login.json())
-#     header = {'Authorization': 'Bearer ' + login.json()["access_token"]}
-#     yield header
-#     # yield user_insert
+def test_create_role():
+    role = {'name': 'test'}
+    response = client.post('/role/create', json=role)
+    assert response.status_code == status.HTTP_201_CREATED
 
 
-# def test_createRole(client: TestClient, setUp: setUp):
-#     print('user')
-#     print()
-    # response = client.post(
-    #     "/role/create/",
-    #     # headers={"X-Token": "coneofsilence"},
-    #     json={
-    #         'name': 'roleTest1',
-    #         'disabled': False
-    #     }
-    # )
-    # assert response.status_code == 201
-    # print(response.json())
+def test_update_role(setUp: setUp):
+    header = setUp
+    role = {'name': 'test2'}
+    response_create = client.post('/role/create', json=role)
+    id_role = str(response_create.json()['id'])
+
+    response_update = client.patch(
+        '/role/'+id_role, json={'name': 'test2edit'}, headers=header)
+    assert response_update.status_code == status.HTTP_200_OK
 
 
-# def test_getRole():
-#     response = client.get('/role/1')
-#     # assert response == {'pep': 'pp'}
-#     print('ppppppppppppppppppppppppppp')
-#     print(response)
-#     print(response.json())
-#     assert response.status_code == 200
+def test_get_role(setUp: setUp):
+    header = setUp
+    role = {'name': 'test3'}
+    response_create = client.post('/role/create', json=role)
+    role_id = str(response_create.json()['id'])
+    response = client.get('/role/'+role_id, headers=header)
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_get_roles(setUp: setUp):
+    header = setUp
+    data = {
+        "params": [
+            {
+                "limit": 10,
+                "offset": 0
+            }
+        ]
+    }
+    role4 = {'name': 'test4'}
+    role5 = {'name': 'test4'}
+    client.post('/role/create', json=role4)
+    client.post('/role/create', json=role5)
+    response = client.post('/role', json=data, headers=header)
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_delete_role(setUp: setUp):
+    header = setUp
+    role_prueba = {'name': 'prueba'}
+    response = client.post('/role/create', json=role_prueba)
+    role_id = response.json()['id']
+    response_delete = client.delete(
+        '/role/delete', params={'role_id': role_id}, headers=header)
+    assert response_delete.status_code == status.HTTP_200_OK
 
 
 # def test_drop_db():

@@ -54,12 +54,13 @@ def create_tables():
 def load_sub_apis():
     log.info('CARGANDO TODAS LAS RUTAS API DE LOS DIRECTORIOS')
     from apis.gneral import General
-    from apis import basic_user_auth, userApi, orderApi, roleApi
+    from apis import basic_user_auth, userApi, orderApi, roleApi, testApi
     app.include_router(General.general)
     app.include_router(basic_user_auth.auth)
     app.include_router(userApi.userApi)
-    app.include_router(orderApi.orderApi)
+    # app.include_router(orderApi.orderApi)
     app.include_router(roleApi.roleApi)
+    app.include_router(testApi.testApi)
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
 

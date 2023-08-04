@@ -22,9 +22,7 @@ class UserController(BaseController):
     def user_exist(self, username: str, email: str):
 
         try:
-            # db: Session = db_connection
-            db = db_connection
-            db = next(db())
+            db= self.db
             user = db.query(self.model).filter(
                 or_(self.model.username == username, self.model.email == email)).first()
             return user
@@ -39,14 +37,14 @@ class UserController(BaseController):
         return item
 
     def update_item(self, item_id, role_list):
-        db = db_connection
-        db = next(db())
+        db= self.db
         item = db.query(self.model).get(item_id)
         if not item:
             return {"msg": "elemento no encontrado"}
         item_update = self.updateSchema.dict(exclude_unset=True)
         # tenemos que elimanr los atributos que estan en modelo para actualizar
-        item_update.pop('roles')
+        if role_list:
+            item_update.pop('roles')
         # actualizamos con los nuevos datos el usuario
         for key, value in item_update.items():
             setattr(item, key, value)

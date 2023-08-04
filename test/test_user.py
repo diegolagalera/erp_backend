@@ -1,43 +1,36 @@
 from ..main import app
 import pytest
 from fastapi.testclient import TestClient
-from fastapi import HTTPException, status
+from fastapi import status
 client = TestClient(app)
-# from config.database import engine
-# from db.models.base import Base
-# Base.metadata.drop_all(bind=engine)
 
-
-# @pytest.fixture(scope="function")
-# def user1():
-#     return {'username': 'diego1', 'password': '123456',
-#             'tel': 000000000, 'email': 'diego@gmail1.com'}
-
-
-# @pytest.fixture(scope="function")
-# def client() -> TestClient:
-#     "start Client"
-#     return TestClient(app)
 
 @pytest.fixture
-def setUp(client: TestClient):
-    print('ooooooooooooooooooooooooooo')
+def setUp():
     user_1 = {'username': 'admin', 'password': 'admin',
               'tel': 000000000, 'email': 'admin@gmail.com', 'roles': [1]}
-    role = client.post(
+    client.post(
         "/role/create/", json={'name': 'admin', 'disabled': False})
-    user_insert = client.post('/user/create', json=user_1)
-    # id = str(user_insert.json()['id'])
+    client.post('/user/create', json=user_1)
     login_user = {'username': 'admin', 'password': 'admin'}
     login = client.post('/auth/login', data=login_user)
     header = {'Authorization': 'Bearer ' + login.json()["access_token"]}
     yield header
 
 
-# def test_createUser(client: TestClient):
-def test_createUser():
+def test_create_user_with_out_roles():
     user_1 = {'username': 'diego1', 'password': '123456',
               'tel': 000000000, 'email': 'diego@gmail1.com'}
+    response = client.post('/user/create', json=user_1)
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_create_user_with_roles():
+    response_role = client.post(
+        "/role/create/", json={'name': 'roltest', 'disabled': False})
+    id_role = response_role.json()['id']
+    user_1 = {'username': 'diegoconrol', 'password': '123456',
+              'tel': 000000000, 'email': 'diegoconrol@gmail1.com', 'roles': [id_role]}
     response = client.post('/user/create', json=user_1)
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -54,13 +47,35 @@ def test_error_in_login():
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
+def test_update_user(setUp: setUp):
+    header = setUp
+    user_prueba = {'username': 'prueba', 'password': '123456',
+                   'tel': 000000000, 'email': 'prueba@gmail.com'}
+    response = client.post('/user/create', json=user_prueba)
+    id_user = str(response.json()['id'])
+    response_update = client.patch('/user/'+id_user, json={'username': 'pruebaedit', 'password': '123456',
+                                                           'tel': 2222, 'email': 'pruebaedit@gmail1.com'}, headers=header)
+    assert response_update.status_code == status.HTTP_200_OK
+
+
+def test_delete_user(setUp: setUp):
+    header = setUp
+    user_prueba = {'username': 'prueba', 'password': '123456',
+                   'tel': 000000000, 'email': 'prueba@gmail.com'}
+    response = client.post('/user/create', json=user_prueba)
+    id_user = response.json()['id']
+    response_delete = client.delete(
+        '/user/delete', params={'user_id': id_user}, headers=header)
+    assert response_delete.status_code == status.HTTP_200_OK
+
+
 def test_get_user(setUp: setUp):
     header = setUp
     response = client.get('/user/1', headers=header)
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_usersError(setUp: setUp):
+def test_get_users(setUp: setUp):
     header = setUp
     data = {
         "params": [
@@ -71,37 +86,9 @@ def test_usersError(setUp: setUp):
         ]
     }
     response = client.post('/user', json=data, headers=header)
-    print(response)
     assert response.status_code == status.HTTP_200_OK
 
-# DELETE / UPDATE
-
-# client.drop_all()
-# def test_createRole(setUp: setUp):
-#     print('user')
-#     header = setUp
-#     print(header)
-#     assert 'ok' == 'ok'
-# response = client.post(
-#     "/role/create/",
-#     # headers={"X-Token": "coneofsilence"},
-#     json={
-#         'name': 'roleTest1',
-#         'disabled': False
-#     }
-# )
-# assert response.status_code == 201
-# print(response.json())
-
-
-# def test_getRole():
-#     response = client.get('/role/1')
-#     # assert response == {'pep': 'pp'}
-#     print('ppppppppppppppppppppppppppp')
-#     print(response)
-#     print(response.json())
-#     assert response.status_code == 200
-
+# TODO TEST ACTUALIZAR ROLES DE USUARIOS
 
 # def drop():
 #     from config.database import engine

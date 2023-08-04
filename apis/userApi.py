@@ -23,45 +23,37 @@ acces_delete_user = [ROLES['admin'], ]
 
 @userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
 def get_users(filter_paginate: filter = None, db: Session = Depends(db_connection)):
-    print(jsonable_encoder(filter_paginate))
     userService = UserService(db=db)
     # quita todos los valores NONES del filtro
     filter = filter_paginate.dict(exclude_unset=True)
-    items, limit, offset = userService.get_items(filter['params'])
+    items, limit, offset, total = userService.get_items(filter['params'])
     response = ShowUserSchemaPaginate()
     response.items = items
     response.limit = limit
     response.offset = offset
+    response.total = total
     return response
 
 
 @userApi.get("/{user_id}", response_model=ShowUserSchema, dependencies=[Depends(RoleChecker(acces_get_usser))])
 def get_user(user_id: int, db: Session = Depends(db_connection)):
     userService = UserService(db=db)
-    response = userService.get_item(user_id)
-    print('hhhhhhhh')
-    print(jsonable_encoder(response))
-    print(jsonable_encoder(response.roles))
-    return response
+    return userService.get_item(user_id)
 
 
 @userApi.post("/create", response_model=ShowUserSchema, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserSchema, db: Session = Depends(db_connection)):
-    print('createee')
     userService = UserService(db=db)
     return userService.create_item(user)
 
 
-@userApi.patch("/{user_id}", response_model=ShowUserSchema)
-def update_user(user_id: int, updateUser: UpdateUserSchema):
-    userService = UserService(updateUser)
-    response = userService.update_item(user_id)
-
-    print(jsonable_encoder(response))
-    return response
+@userApi.patch("/{user_id}", response_model=ShowUserSchema, dependencies=[Depends(RoleChecker(acces_update_user))])
+def update_user(user_id: int, updateUser: UpdateUserSchema, db: Session = Depends(db_connection)):
+    userService = UserService(updateUser, db=db)
+    return userService.update_item(user_id)
 
 
-@userApi.delete("/delete")
-def delete_user(user_id: int):
-    userService = UserService()
+@userApi.delete("/delete", dependencies=[Depends(RoleChecker(acces_delete_user))])
+def delete_user(user_id: int, db: Session = Depends(db_connection)):
+    userService = UserService(db=db)
     return userService.delete_item(user_id)

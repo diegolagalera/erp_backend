@@ -77,6 +77,7 @@ class ShowUserSchemaPaginate(BaseModel):
     items: List[ShowUserSchema] = []
     limit: int = None
     offset: int = None
+    total: int = None
 
     class Config:
         orm_mode = True

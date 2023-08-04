@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from schemas.UserSchemas import ShowUserSchema, UpdateUserSchema
+# from schemas.UserSchemas import ShowUserSchema, UpdateUserSchema
+from db.models.user import ShowUserSchema, UpdateUserSchema
 from schemas.OrderSchemas import OrderSchema, ShowOrderSchema, ShowOrderSchemaPaginate, filter, UpdateOrderSchema
 from service.orderService import OrderService
 from config.roleChecker import RoleChecker
@@ -69,7 +70,6 @@ def delete_order(order_id: int):
 
 @orderApi.get("/user/orders")
 async def order_user(user_id:Optional[int]=None,auth_user: ShowUserSchema = Depends(current_user, use_cache=True)):
-    print(auth_user.id)
     userService = OrderService()
     if user_id:
         user = userService.order_user(user_id)
@@ -77,7 +77,6 @@ async def order_user(user_id:Optional[int]=None,auth_user: ShowUserSchema = Depe
         user = response = userService.order_user(auth_user.id)
     response = jsonable_encoder(user)
     response['orders'] = jsonable_encoder(user.orders)
-    print(response)
 
     return "holaa"
 

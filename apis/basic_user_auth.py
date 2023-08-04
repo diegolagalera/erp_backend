@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from schemas.UserSchemas import UserSchema, ShowUserSchema
+# from schemas.UserSchemas import UserSchema, ShowUserSchema
+from db.models.user import UserSchema, ShowUserSchema
 from fastapi.encoders import jsonable_encoder
 
 # from sqlalchemy.orm import Session
@@ -77,9 +78,7 @@ def auth_user(token: str = Depends(oauth2),  db=Depends(db_connection)):
         if username is None:
             raise exception
     # except (OAuth2Error,OAuth2Error) as e:
-    #     print('joderr')
     except (OAuth2Error, JWTError):
-        print('joderr')
 
         raise exception_time_out
 

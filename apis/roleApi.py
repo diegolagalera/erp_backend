@@ -28,9 +28,9 @@ acces_delete_user = [ROLES['admin'], ]
 
 
 # @userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
-@roleApi.post("/", response_model=ShowRoleSchemaPaginate)
-def get_orders(filter_paginate: filter = None):
-    roleService = RoleService()
+@roleApi.post("/", response_model=ShowRoleSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
+def get_roles(filter_paginate: filter = None, db: Session = Depends(db_connection)):
+    roleService = RoleService(db=db)
     # quita todos los valores NONES del filtro
     filter = filter_paginate.dict(exclude_unset=True)
     items, limit, offset = roleService.get_items(filter['params'])
@@ -41,18 +41,14 @@ def get_orders(filter_paginate: filter = None):
     return response
 
 
-@roleApi.get("/{role_id}", response_model=ShowRoleSchema)
-async def get_order(role_id: int, db: Session = Depends(db_connection)):
-    print('gggg')
-    print(db)
+@roleApi.get("/{role_id}", response_model=ShowRoleSchema, dependencies=[Depends(RoleChecker(acces_get_usser))])
+async def get_role(role_id: int, db: Session = Depends(db_connection)):
     roleService = RoleService(db=db)
-    response = roleService.get_item(role_id)
-    print(response.users)
-    return response
+    return roleService.get_item(role_id)
 
 
 @roleApi.post("/create", response_model=ShowRoleSchema, status_code=status.HTTP_201_CREATED)
-async def create_order(order: RoleSchema, db: Session = Depends(db_connection)):
+async def create_role(order: RoleSchema, db: Session = Depends(db_connection)):
     roleService = RoleService(db=db)
     # auth_user(request)
     try:
@@ -64,15 +60,15 @@ async def create_order(order: RoleSchema, db: Session = Depends(db_connection)):
         )
 
 
-@roleApi.patch("/{role_id}", response_model=ShowRoleSchema)
-def update_order(role_id: int, updateRole: UpdateRoleSchema):
-    roleService = RoleService(updateRole)
+@roleApi.patch("/{role_id}", response_model=ShowRoleSchema, dependencies=[Depends(RoleChecker(acces_update_user))])
+def update_role(role_id: int, updateRole: UpdateRoleSchema, db: Session = Depends(db_connection)):
+    roleService = RoleService(updateRole, db=db)
     return roleService.update_item(role_id)
 
 
-@roleApi.delete("/delete")
-def delete_order(role_id: int):
-    roleService = RoleService()
+@roleApi.delete("/delete", dependencies=[Depends(RoleChecker(acces_delete_user))])
+def delete_role(role_id: int, db: Session = Depends(db_connection)):
+    roleService = RoleService(db=db)
     return roleService.delete_item(role_id)
 
 
