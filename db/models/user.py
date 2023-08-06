@@ -8,6 +8,7 @@ from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Union
+from db.models.address import AddressSchema, Address, ShowAddressSchema
 
 user_roles = Table('user_roles', Base.metadata,
                    Column('user_id', Integer, ForeignKey('users.id')),
@@ -22,15 +23,17 @@ class User(Base):
     password = Column(String)
     name = Column(String)
     surname = Column(String)
-    direction = Column(String)
     tel = Column(Integer)
     email = Column(String, unique=True)
     created = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     disabled = Column(Boolean, default=False)
+    # address_id = Column(Integer, ForeignKey('addresses.id'))
 
+    addresses = relationship('Address', back_populates='user', lazy='joined')
+    # address = relationship('Address', uselist=False)  # One-to-One relationship
     orders = relationship('Order', back_populates='user')
-
-    roles = relationship('Role', secondary=user_roles, back_populates='users')
+    roles = relationship('Role', secondary=user_roles,
+                         back_populates='users', lazy='joined')
 
 # OTHER RELATIONS
 
@@ -49,12 +52,12 @@ class UserSchema(BaseModel):
     password: str
     name: Optional[str] = None
     surname: Optional[str] = None
-    direction: Optional[str] = None
     tel: int
     email: str
     created: Optional[datetime] = datetime.now()
     disabled: Optional[bool] = False
     roles: Optional[List[int]] = None
+    addresses: Optional[AddressSchema] = None
 
 
 class ShowUserSchema(BaseModel):
@@ -62,12 +65,12 @@ class ShowUserSchema(BaseModel):
     username: Optional[str] = None
     name: Optional[str] = None
     surname: Optional[str] = None
-    direction: Optional[str] = None
     tel: int
     email: str
     created: datetime
     disabled: bool
     roles: Optional[List[RolesInfo]] = None
+    addresses: Optional[List[ShowAddressSchema]] = None
 
     class Config:
         orm_mode = True
@@ -88,11 +91,11 @@ class UpdateUserSchema(BaseModel):
     password: str = None
     name: str = None
     surname: str = None
-    direction: str = None
     tel: int = None
     email: str = None
     disabled: bool = None
     roles: Optional[List[int]] = None
+    addresses: Optional[List[ShowAddressSchema]] = None
 
     # role: List[int] = None
 
@@ -102,7 +105,6 @@ class filterUserParamsSchema(BaseModel):
     username: Union[str, List[str]] = None
     name: Union[str, List[str]] = None
     surname: Union[str, List[str]] = None
-    direction: Union[str, List[str]] = None
     tel: Union[int, List[int]] = None
     email: Union[str, List[str]] = None
     created: List[Union[datetime, None]] = None

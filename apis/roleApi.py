@@ -29,15 +29,16 @@ acces_delete_user = [ROLES['admin'], ]
 
 # @userApi.post("/", response_model=ShowUserSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
 @roleApi.post("/", response_model=ShowRoleSchemaPaginate, dependencies=[Depends(RoleChecker(acces_get_ussers))])
-def get_roles(filter_paginate: filter = None, db: Session = Depends(db_connection)):
+async def get_roles(filter_paginate: filter = None, db: Session = Depends(db_connection)):
     roleService = RoleService(db=db)
     # quita todos los valores NONES del filtro
     filter = filter_paginate.dict(exclude_unset=True)
-    items, limit, offset = roleService.get_items(filter['params'])
+    items, limit, offset, total = roleService.get_items(filter['params'])
     response = ShowRoleSchemaPaginate()
     response.items = items
     response.limit = limit
     response.offset = offset
+    response.total = total
     return response
 
 
@@ -61,13 +62,13 @@ async def create_role(order: RoleSchema, db: Session = Depends(db_connection)):
 
 
 @roleApi.patch("/{role_id}", response_model=ShowRoleSchema, dependencies=[Depends(RoleChecker(acces_update_user))])
-def update_role(role_id: int, updateRole: UpdateRoleSchema, db: Session = Depends(db_connection)):
+async def update_role(role_id: int, updateRole: UpdateRoleSchema, db: Session = Depends(db_connection)):
     roleService = RoleService(updateRole, db=db)
     return roleService.update_item(role_id)
 
 
 @roleApi.delete("/delete", dependencies=[Depends(RoleChecker(acces_delete_user))])
-def delete_role(role_id: int, db: Session = Depends(db_connection)):
+async def delete_role(role_id: int, db: Session = Depends(db_connection)):
     roleService = RoleService(db=db)
     return roleService.delete_item(role_id)
 

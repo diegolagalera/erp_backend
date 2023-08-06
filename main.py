@@ -43,6 +43,7 @@ def create_tables():
     from db.models.base import Base
     from db.datos.datos import create_data
     from config.roleConstant import defineRoleConstant
+    # Base.metadata.drop_all(bind=engine)
     if ENV == 'test':
         Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)

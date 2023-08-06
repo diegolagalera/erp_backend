@@ -21,10 +21,14 @@ class BaseService():
         itemCtr = self.modelCtr(db=self.db)
         return itemCtr.get_item(item_id)
 
-    def create_item(self, item):
+    def create_item(self, item, transaction: bool = False):
+        print('ooooouuuuu')
         log.info(f'Create Item {self.__class__.__name__}')
         itemCtr = self.modelCtr(db=self.db)
-        response = itemCtr.create_item(item.dict())
+        if type(item) == dict:
+            response = itemCtr.create_item(item, transaction=transaction)
+        else:
+            response = itemCtr.create_item(item.dict())
         return response
 
     def update_item(self, item_id: int):

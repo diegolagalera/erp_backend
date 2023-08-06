@@ -45,9 +45,13 @@ class UserController(BaseController):
         # tenemos que elimanr los atributos que estan en modelo para actualizar
         if role_list:
             item_update.pop('roles')
+        if 'addresses' in item_update:
+            item_update.pop('addresses')
         # actualizamos con los nuevos datos el usuario
+
         for key, value in item_update.items():
             setattr(item, key, value)
+
         # actulizamos los roles del usuario
         if role_list != None:
             if len(role_list) != 0:

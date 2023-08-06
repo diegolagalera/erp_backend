@@ -49,6 +49,7 @@ class ShowRoleSchemaPaginate(BaseModel):
     items: List[ShowRoleSchema] = []
     limit: int = None
     offset: int = None
+    total:int = None
 
     class Config:
         orm_mode = True

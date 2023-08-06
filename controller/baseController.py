@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 # from sqlalchemy.orm import Session
 from config.database import db_connection
 from fastapi import HTTPException, status
+from db.models.address import Address
 import logging
 log = logging.getLogger("app")
 
@@ -47,7 +48,7 @@ class BaseController():
                 detail="Error al obtener elemento de la BD " + str(e)
             )
 
-    def create_item(self, item, is_model: bool = False):
+    def create_item(self, item, is_model: bool = False, transaction: bool = False):
         log.info(f'Create Item {self.__class__.__name__}')
         try:
             db = self.db
@@ -57,8 +58,9 @@ class BaseController():
             else:
                 newItem = self.model(**item)
             db.add(newItem)
-            db.commit()
-            db.refresh(newItem)
+            if not transaction:
+                db.commit()
+                db.refresh(newItem)
             return newItem
         except SQLAlchemyError as e:
             raise HTTPException(
@@ -69,6 +71,9 @@ class BaseController():
     def update_item(self, item_id):
         log.info(f'Update Item {self.__class__.__name__}')
         try:
+            print('iiiiiiiiiiiiiii')
+            print(self.updateSchema)
+            print(self.updateSchema.street)
             db = self.db
             item = db.query(self.model).filter(self.model.id == item_id)
             if not item.first():
@@ -136,6 +141,18 @@ class BaseController():
                     for column in self.model.__table__.columns:
                         filtros.append(
                             cast(column, sqlalchemy.String).like(f"%{text}%"))
+                    if self.model.addresses:
+                        print('addddddddddddd')
+                        print(text)
+                        query = query.join(Address)
+                        # filtrosAddress = []
+                        for column in Address.__table__.columns:
+                            print(column)
+                            # aquic podemos añadir los campos donde no queremos filtrar.
+                            if column != 'addresses.created':
+                                filtros.append(
+                                    cast(column, sqlalchemy.String).like(f"%{text}%"))
+
                     query = query.filter(or_(*filtros))
                 # en caso contrario buscaremos por la columna especificada con el filtro especificado (==, like, !=, in)
                 else:
@@ -210,13 +227,12 @@ class BaseController():
                             offset).limit(limit).all()
                     except:
                         pass
-                else: #se puede quitar
+                else:  # se puede quitar
                     total = query.count()
                     items = query.all()
             else:
                 total = query.count()
                 items = query.all()
-
             return items, limit, offset, total
         except SQLAlchemyError as e:
             raise HTTPException(
