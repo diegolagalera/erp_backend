@@ -71,9 +71,6 @@ class BaseController():
     def update_item(self, item_id):
         log.info(f'Update Item {self.__class__.__name__}')
         try:
-            print('iiiiiiiiiiiiiii')
-            print(self.updateSchema)
-            print(self.updateSchema.street)
             db = self.db
             item = db.query(self.model).filter(self.model.id == item_id)
             if not item.first():
