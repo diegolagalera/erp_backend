@@ -77,21 +77,4 @@ class UserService(BaseService):
         if addresses:
             addressService = AddressService(db=self.db)
             addressService.update_items(addresses)
-            # print('addreesssssss')
-            # print(addresses)
-            # for address in addresses:
-            #     print(address)
-            #     updateAddress = UpdateAddressSchema(address)
-            #     print(updateAddress)
-            #     print(updateAddress.street)
-            #     AddressService(db=self.db, updateSchema=updateAddress)
-            # updateAddress = AddressService.update_item(itemToUpdate['roles'])
-        # if roles == None:
-        #     return user_ctr.update_item(user_id, None)
-        # else:
         return user_ctr.update_item(user_id, role_list)
-
-    def delete_item(self, item_id: int):
-        user_ctr = UserController()
-        return user_ctr.delete_item(item_id)
-        # return super().delete_item(item_id)

@@ -81,8 +81,7 @@ class UserController(BaseController):
         return user
 
     def delete_item(self, item_id):
-        db = db_connection
-        db = next(db())
+        db= self.db
         user = db.query(self.model).get(item_id)
         user.roles.clear()
         db.delete(user)

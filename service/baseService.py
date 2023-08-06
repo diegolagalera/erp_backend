@@ -22,7 +22,6 @@ class BaseService():
         return itemCtr.get_item(item_id)
 
     def create_item(self, item, transaction: bool = False):
-        print('ooooouuuuu')
         log.info(f'Create Item {self.__class__.__name__}')
         itemCtr = self.modelCtr(db=self.db)
         if type(item) == dict:

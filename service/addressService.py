@@ -20,11 +20,7 @@ class AddressService(BaseService):
         self.db = db
 
     def update_items(self, addresses: list):
-        print('addreesssssss')
-        # print(addresses['street'])
         for address in addresses:
-            # address = address.d
-            print(address['street'])
             updateAddress = UpdateAddressSchema(
                 id=address['id'],
                 street=address['street'],
@@ -35,7 +31,5 @@ class AddressService(BaseService):
             )
             self.updateSchema = updateAddress
             super().update_item(address['id'])
-            print(',,,,,,,,,,,,,,,,,,,,,,,,,')
-            print(updateAddress)
-            print(updateAddress.street)
+    
         return

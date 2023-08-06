@@ -29,7 +29,8 @@ class User(Base):
     disabled = Column(Boolean, default=False)
     # address_id = Column(Integer, ForeignKey('addresses.id'))
 
-    addresses = relationship('Address', back_populates='user', lazy='joined')
+    addresses = relationship(
+        'Address', back_populates='user', lazy='joined', cascade='all, delete-orphan')
     # address = relationship('Address', uselist=False)  # One-to-One relationship
     orders = relationship('Order', back_populates='user')
     roles = relationship('Role', secondary=user_roles,
@@ -88,7 +89,7 @@ class ShowUserSchemaPaginate(BaseModel):
 
 class UpdateUserSchema(BaseModel):
     username: str = None
-    password: str = None
+    # password: str = None
     name: str = None
     surname: str = None
     tel: int = None

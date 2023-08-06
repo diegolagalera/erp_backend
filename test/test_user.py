@@ -69,6 +69,35 @@ def test_delete_user(setUp: setUp):
     assert response_delete.status_code == status.HTTP_200_OK
 
 
+def test_delete_user_with_roles_and_address(setUp: setUp):
+    header = setUp
+    user_prueba = {
+        "username": "string",
+        "password": "string",
+        "name": "string",
+        "surname": "string",
+        "tel": 0,
+        "email": "string",
+        "created": "2023-08-06T21:52:26.915211",
+        "disabled": False,
+        "roles": [
+            1
+        ],
+        "addresses": {
+            "street": "string11",
+            "province": "string",
+            "city": "string",
+            "postal_code": "string",
+            "others": "string"
+        }
+    }
+    response = client.post('/user/create', json=user_prueba)
+    id_user = response.json()['id']
+    response_delete = client.delete(
+        '/user/delete', params={'user_id': id_user}, headers=header)
+    assert response_delete.status_code == status.HTTP_200_OK
+
+
 def test_get_user(setUp: setUp):
     header = setUp
     response = client.get('/user/1', headers=header)
